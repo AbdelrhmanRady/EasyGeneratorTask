@@ -1,39 +1,43 @@
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const HAS_LETTER = /[A-Za-z]/;
-const HAS_NUMBER = /\d/;
-const HAS_SPECIAL = /[^A-Za-z0-9]/;
+import { z } from "zod";
 
-export const passwordRules = {
-  minLength: 8,
-  hasLetter: true,
-  hasNumber: true,
-  hasSpecial: true,
-} as const;
+const email = z
+  .email("Enter a valid email address.")
+  .trim()
+  .min(1, "Email is required.");
 
-export const nameRules = {
-  minLength: 3,
-} as const;
+const password = z
+  .string()
+  .min(8, "Password must be at least 8 characters.")
+  .max(128, "Password must be at most 128 characters.")
+  .regex(/[A-Za-z]/, "Password must include at least one letter.")
+  .regex(/\d/, "Password must include at least one number.")
+  .regex(/[^A-Za-z0-9]/, "Password must include at least one special character.");
 
-export function validateEmail(value: string): string | undefined {
-  if (!value.trim()) return "Email is required.";
-  if (!EMAIL_PATTERN.test(value.trim())) return "Enter a valid email address.";
-}
+export const signUpSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(3, "Name must be at least 3 characters.")
+    .max(100, "Name must be at most 100 characters."),
+  email,
+  password,
+});
 
-export function validateName(value: string): string | undefined {
-  if (!value.trim()) return "Name is required.";
-  if (value.trim().length < nameRules.minLength) {
-    return `Name must be at least ${nameRules.minLength} characters.`;
-  }
-}
+export const signInSchema = z.object({
+  email,
+  password: z
+    .string()
+    .min(1, "Password is required.")
+    .max(128, "Password must be at most 128 characters."),
+});
 
-export function validatePassword(value: string): string | undefined {
-  if (!value) return "Password is required.";
-  if (value.length < passwordRules.minLength) {
-    return `Password must be at least ${passwordRules.minLength} characters.`;
-  }
-  if (!HAS_LETTER.test(value)) return "Password must include at least one letter.";
-  if (!HAS_NUMBER.test(value)) return "Password must include at least one number.";
-  if (!HAS_SPECIAL.test(value)) {
-    return "Password must include at least one special character.";
-  }
+export function fieldErrorsOf(error: z.ZodError) {
+  const { fieldErrors } = z.flattenError(error);
+
+  return Object.fromEntries(
+    Object.entries(fieldErrors).flatMap(([field, messages]) => {
+      const message = Array.isArray(messages) ? messages[0] : messages;
+      return message ? [[field, String(message)]] : [];
+    }),
+  );
 }

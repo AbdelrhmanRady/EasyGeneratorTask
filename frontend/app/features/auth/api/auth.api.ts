@@ -1,21 +1,32 @@
-import type { AuthSession, SignInPayload, SignUpPayload } from "../types";
+import { api } from "~/lib/http";
+import type {
+  AuthResponse,
+  AuthUser,
+  SignInPayload,
+  SignUpPayload,
+  TokenResponse,
+} from "../types";
 
-const notImplemented = (operation: string): never => {
-  throw new Error(`Auth API is not wired yet: ${operation}`);
-};
-
-export async function signUp(_payload: SignUpPayload): Promise<AuthSession> {
-  return notImplemented("signUp");
+export async function signUp(payload: SignUpPayload) {
+  const { data } = await api.post<AuthResponse>("/auth/sign-up", payload);
+  return data;
 }
 
-export async function signIn(_payload: SignInPayload): Promise<AuthSession> {
-  return notImplemented("signIn");
+export async function signIn(payload: SignInPayload) {
+  const { data } = await api.post<AuthResponse>("/auth/sign-in", payload);
+  return data;
 }
 
-export async function signOut(): Promise<void> {
-  return notImplemented("signOut");
+export async function refreshAccessToken(refreshToken: string) {
+  const { data } = await api.post<TokenResponse>("/auth/token/refresh", {
+    refreshToken,
+  });
+  return data;
 }
 
-export async function getCurrentSession(): Promise<AuthSession | null> {
-  return null;
+export async function getMe(accessToken: string) {
+  const { data } = await api.get<AuthUser>("/me", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return data;
 }

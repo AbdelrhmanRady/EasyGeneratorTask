@@ -6,10 +6,14 @@ services:
     ports:
       - "3000:3000"
     environment:
+      NODE_ENV: development
       PORT: 3000
       MONGODB_URI: mongodb://mongo:27017/easygenerator
       JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-32chars}
       REDIS_URL: redis://redis:6379
+    volumes:
+      - .:/app
+      - api-node-modules:/app/node_modules
     depends_on:
       mongo:
         condition: service_healthy
@@ -42,5 +46,6 @@ services:
       retries: 5
 
 volumes:
+  api-node-modules:
   mongo-data:
   redis-data:
