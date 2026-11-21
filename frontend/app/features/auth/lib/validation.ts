@@ -32,12 +32,21 @@ export const signInSchema = z.object({
 });
 
 export function fieldErrorsOf(error: z.ZodError) {
-  const { fieldErrors } = z.flattenError(error);
+  const fieldErrors: {
+    name?: string;
+    email?: string;
+    password?: string;
+  } = {};
 
-  return Object.fromEntries(
-    Object.entries(fieldErrors).flatMap(([field, messages]) => {
-      const message = Array.isArray(messages) ? messages[0] : messages;
-      return message ? [[field, String(message)]] : [];
-    }),
-  );
+  for (const issue of error.issues) {
+    const field = issue.path[0];
+    if (
+      (field === "name" || field === "email" || field === "password") &&
+      !fieldErrors[field]
+    ) {
+      fieldErrors[field] = issue.message;
+    }
+  }
+
+  return fieldErrors;
 }

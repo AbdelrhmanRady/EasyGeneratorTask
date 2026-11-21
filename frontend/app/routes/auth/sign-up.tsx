@@ -7,7 +7,6 @@ import {
 import { AuthPanel } from "~/features/auth/components/AuthPanel";
 import { SignUpForm } from "~/features/auth/components/SignUpForm";
 import { fieldErrorsOf, signUpSchema } from "~/features/auth/lib/validation";
-import type { AuthFormResult } from "~/features/auth/types";
 import { paths } from "~/lib/paths";
 import type { Route } from "./+types/sign-up";
 
@@ -33,7 +32,7 @@ export async function action({ request }: Route.ActionArgs) {
   const parsed = signUpSchema.safeParse(values);
 
   if (!parsed.success) {
-    return data<AuthFormResult<"name" | "email" | "password">>(
+    return data(
       {
         fieldErrors: fieldErrorsOf(parsed.error),
         values: { name: values.name, email: values.email },
@@ -46,7 +45,7 @@ export async function action({ request }: Route.ActionArgs) {
     return await signUpAndRedirect(request, parsed.data);
   } catch (error) {
     if (error instanceof Response) throw error;
-    return toAuthFormError<"name" | "email" | "password">(error, {
+    return toAuthFormError(error, {
       name: parsed.data.name,
       email: parsed.data.email,
     });

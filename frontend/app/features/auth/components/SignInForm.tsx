@@ -6,7 +6,7 @@ import { Input } from "~/components/ui/Input";
 import type { AuthFormResult } from "../types";
 
 type SignInFormProps = {
-  result?: AuthFormResult<"email" | "password">;
+  result?: AuthFormResult;
 };
 
 export function SignInForm({ result }: SignInFormProps) {

@@ -103,73 +103,39 @@ export async function redirectIfAuthenticated(request: Request) {
   }
 }
 
-function parseFieldErrors(message: string | string[] | undefined) {
-  const lines = Array.isArray(message) ? message : message ? [message] : [];
-  const fieldErrors: Record<string, string> = {};
-  const leftover: string[] = [];
-
-  for (const line of lines) {
-    const match = line.match(/^(email|name|password)\s*:\s*(.+)$/i);
-    if (match) {
-      fieldErrors[match[1].toLowerCase()] = match[2];
-    } else {
-      leftover.push(line);
-    }
-  }
-
-  return {
-    fieldErrors,
-    formError: leftover.join(". ") || undefined,
-  };
-}
-
-export function toAuthFormError<T extends string>(
+export function toAuthFormError(
   error: unknown,
-  values: AuthFormResult<T>["values"],
+  values: AuthFormResult["values"],
 ) {
-  if (isAxiosError(error) && error.response) {
-    const status = error.response.status;
-    const message = error.response.data?.message as string | string[] | undefined;
-    const parsed = parseFieldErrors(message);
-    const fieldErrors = {
-      ...parsed.fieldErrors,
-    } as AuthFormResult<T>["fieldErrors"];
-
-    if (status === 409) {
-      return data<AuthFormResult<T>>(
-        {
-          fieldErrors: {
-            ...fieldErrors,
-            email: "Email already registered",
-          } as AuthFormResult<T>["fieldErrors"],
-          values,
-        },
-        { status: 409 },
-      );
-    }
-
-    if (status === 401) {
-      return data<AuthFormResult<T>>(
-        { formError: "Invalid email or password", values },
-        { status: 401 },
-      );
-    }
-
-    return data<AuthFormResult<T>>(
-      {
-        fieldErrors,
-        formError:
-          parsed.formError ||
-          (fieldErrors && Object.keys(fieldErrors).length
-            ? undefined
-            : error.message),
-        values,
-      },
-      { status },
+  if (isAxiosError(error) && error.response?.status === 409) {
+    return data<AuthFormResult>(
+      { fieldErrors: { email: "Email already registered" }, values },
+      { status: 409 },
     );
   }
 
-  return data<AuthFormResult<T>>(
+  if (isAxiosError(error) && error.response?.status === 401) {
+    return data<AuthFormResult>(
+      { formError: "Invalid email or password", values },
+      { status: 401 },
+    );
+  }
+
+  if (isAxiosError(error) && error.response) {
+    const message = error.response.data?.message;
+    const formError = Array.isArray(message)
+      ? message.join(". ")
+      : typeof message === "string"
+        ? message
+        : "Something went wrong. Try again.";
+
+    return data<AuthFormResult>(
+      { formError, values },
+      { status: error.response.status },
+    );
+  }
+
+  return data<AuthFormResult>(
     {
       formError: "Unable to reach the server. Try again in a moment.",
       values,

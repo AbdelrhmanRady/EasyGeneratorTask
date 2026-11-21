@@ -21,10 +21,17 @@ export type AuthResponse = TokenResponse & {
   user: AuthUser;
 };
 
-export type FieldErrors<T extends string> = Partial<Record<T, string>>;
+export type AuthFieldErrors = {
+  name?: string;
+  email?: string;
+  password?: string;
+};
 
-export type AuthFormResult<T extends string> = {
-  fieldErrors?: FieldErrors<T>;
+export type AuthFormResult = {
+  fieldErrors?: AuthFieldErrors;
   formError?: string;
-  values?: Partial<Record<T, string>>;
+  values?: {
+    name?: string;
+    email?: string;
+  };
 };
