@@ -11,6 +11,9 @@ services:
       MONGODB_URI: mongodb://mongo:27017/easygenerator
       JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-32chars}
       REDIS_URL: redis://redis:6379
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-10}
+      RATE_LIMIT_TTL_SECONDS: ${RATE_LIMIT_TTL_SECONDS:-60}
+    command: ["npm", "run", "start:dev", "--", "-p", "tsconfig.docker.json"]
     volumes:
       - .:/app
       - api-node-modules:/app/node_modules
@@ -19,6 +22,28 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  frontend:
+    image: node:22-alpine
+    working_dir: /app
+    ports:
+      - "5173:5173"
+    environment:
+      NODE_ENV: development
+      API_URL: http://api:3000
+      SESSION_SECRET: ${SESSION_SECRET:-easygenerator-dev-session-secret}
+      CHOKIDAR_USEPOLLING: "true"
+    command:
+      [
+        "sh",
+        "-c",
+        "if [ ! -x node_modules/.bin/react-router ]; then npm ci; fi; exec npm run dev -- --host 0.0.0.0 --port 5173",
+      ]
+    volumes:
+      - ../frontend:/app
+      - frontend-node-modules:/app/node_modules
+    depends_on:
+      - api
 
   mongo:
     image: mongo:8.0
@@ -47,5 +72,6 @@ services:
 
 volumes:
   api-node-modules:
+  frontend-node-modules:
   mongo-data:
   redis-data:

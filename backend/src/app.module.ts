@@ -5,6 +5,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { createObserveModule } from '@nestjs/observe';
 import { AuthModule } from './auth/auth.module.js';
+import { LoggingModule } from './logging/logging.module.js';
+import { RateLimitModule } from './rate-limit/rate-limit.module.js';
+import { RedisModule } from './redis/redis.module.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { envSchema, type Env } from './config/env.schema.js';
@@ -41,6 +44,9 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       appSecret: process.env.OBSERVE_APP_SECRET ?? 'YOUR_APP_SECRET',
       serviceId: 'backend',
     }),
+    LoggingModule,
+    RedisModule,
+    RateLimitModule,
     UsersModule,
     AuthModule,
   ],

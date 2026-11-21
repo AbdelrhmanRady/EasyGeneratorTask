@@ -7,6 +7,9 @@ import { AppModule } from './../src/app.module.js';
 process.env.NODE_ENV ??= 'test';
 process.env.JWT_SECRET ??= 'test-jwt-secret-must-be-32-characters-min';
 process.env.MONGODB_URI ??= 'mongodb://127.0.0.1:27017/easygenerator-test';
+process.env.REDIS_URL ??= 'redis://127.0.0.1:6379';
+process.env.RATE_LIMIT_MAX ??= '100';
+process.env.RATE_LIMIT_TTL_SECONDS ??= '60';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;

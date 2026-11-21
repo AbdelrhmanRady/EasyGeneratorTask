@@ -25,3 +25,19 @@ export const refreshTokenSchema = z.object({
   refreshToken: z.string().min(1),
 });
 export type RefreshTokenDto = z.infer<typeof refreshTokenSchema>;
+
+export const userResponseSchema = z.object({
+  id: z.string(),
+  email: z.email(),
+  name: z.string(),
+  createdAt: z.iso.datetime(),
+});
+
+export const sessionResponseSchema = z.object({
+  user: userResponseSchema,
+  accessToken: z.string(),
+  expiresIn: z.number().int(),
+  refreshToken: z.string(),
+});
+
+export const refreshedTokenResponseSchema = sessionResponseSchema.omit({ user: true });
