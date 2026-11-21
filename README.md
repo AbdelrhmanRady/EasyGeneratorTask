@@ -4,6 +4,8 @@ Development runs in Docker: the frontend, the API, MongoDB, and Redis. Start the
 
 The app is at http://localhost:5173. The API is at http://localhost:3000, and its docs are at http://localhost:3000/docs.
 
+Besides sign-up, sign-in, and the protected user route, the API also has request logging, rate limiting, tests, and a GitHub Actions workflow that runs the lint and test checks. The API documentation is the `/docs` page above.
+
 ## Linux and macOS
 
 ```sh
